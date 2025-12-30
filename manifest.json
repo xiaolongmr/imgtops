@@ -1,6 +1,6 @@
 {
   "id": "com.simple.importer.v5.final",
-  "name": "图片导导",
+  "name": "图片导导 Lite",
   "version": "1.1.4",
   "main": "index.html",
   "manifestVersion": 5,
@@ -13,9 +13,9 @@
       "type": "panel",
       "id": "importerPanel",
       "label": {
-        "default": "Importer",
-        "zh-CN": "图片导导",
-        "zh-TW": "圖片導導"
+        "default": "Importer Lite",
+        "zh-CN": "图片导导 Lite",
+        "zh-TW": "圖片導導 Lite"
       },
       "minimumSize": { "width": 230, "height": 300 },
       "maximumSize": { "width": 300, "height": 600 },
