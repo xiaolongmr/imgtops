@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         PS图片导导 UserScript助手 (修复版 v1.80)
+// @name         PS图片导导助手
 // @namespace    http://tampermonkey.net/
-// @version      1.80
-// @description  修复微信文章/容器嵌套图片无法获取的问题。支持向下探测子元素。
-// @author       爱吃馍 & 优化助手
+// @version      0.1
+// @description  获取网站的图片并发送给PS，需搭配PS插件图片导导使用
+// @author       爱吃馍的小张，公众号：爱吃馍
 // @match        *://*/*
 // @grant        GM_setClipboard
 // @grant        GM_notification
@@ -30,17 +30,17 @@
     }
 
     // ==========================================
-    // 2. URL 处理 (增强正则)
+    // 2. URL 处理
     // ==========================================
     function processImageUrl(url) {
         if (!url) return null;
         // 移除首尾引号、空白、回车符 (微信图片有时会有换行)
         let cleanUrl = url.replace(/^['"\s]+|['"\s]+$/g, '').trim();
-        
+
         try {
             cleanUrl = new URL(cleanUrl, window.location.href).href;
         } catch (e) { console.error(e); }
-    
+
         if (cleanUrl.includes("gd-filems.dancf.com")) return cleanUrl.split('?')[0];
         // B站去除参数
         if (cleanUrl.includes(".hdslb.com")) return cleanUrl.split('@')[0];
@@ -48,7 +48,7 @@
         if (cleanUrl.includes("360buyimg.com") && cleanUrl.endsWith(".avif")) {
             return cleanUrl.slice(0, -5); // 移除最后5个字符 ".avif"
         }
-        
+
         return cleanUrl;
     }
 
@@ -61,13 +61,13 @@
 
         let current = startNode;
         let depth = 0;
-        const maxSearchDepth = 4; 
+        const maxSearchDepth = 4;
 
         while (current && depth < maxSearchDepth) {
-            let name = current.getAttribute('alt') || 
-                       current.getAttribute('title') || 
+            let name = current.getAttribute('alt') ||
+                       current.getAttribute('title') ||
                        current.getAttribute('aria-label');
-            
+
             if (!name && current.tagName === 'SPAN' && current.innerText.length < 50) {
                  name = current.innerText;
             }
@@ -82,7 +82,7 @@
     // ==========================================
     // 4. 核心探测 (全面升级：上/下/左/右)
     // ==========================================
-    
+
     // 提取背景图 URL 的工具函数
     function extractBgUrl(node, pseudo=null) {
         try {
@@ -107,14 +107,14 @@
         // 3. 检查 伪类
         if (url = extractBgUrl(node, '::before')) return { url: url, element: node };
         if (url = extractBgUrl(node, '::after')) return { url: url, element: node };
-        
+
         return null;
     }
 
-    // 【新增】向下探测子元素 (解决微信嵌套问题)
+    // 向下探测子元素 (解决微信嵌套问题)
     function checkChildren(node) {
         if (!node || node.nodeType !== 1) return null;
-        
+
         // 尝试查找内部的 IMG
         const img = node.querySelector('img');
         if (img && img.src) return { url: img.src, element: img };
@@ -125,7 +125,7 @@
              let url = extractBgUrl(bgEl);
              if (url) return { url: url, element: bgEl };
         }
-        
+
         // 如果是用 class 控制的背景图，尝试找 i 标签 (微信常用 i 做背景容器)
         const iTag = node.querySelector('i');
         if (iTag) {
@@ -146,7 +146,7 @@
             let res = checkNode(current);
             if (res) return res;
 
-            // 2. 【新增】查内部子元素 (解决容器嵌套问题)
+            // 2. 查内部子元素 (解决容器嵌套问题)
             // 只有当当前节点是 DIV/SPAN/SECTION 等容器时才查，避免性能浪费
             if (['DIV', 'SPAN', 'SECTION', 'A', 'LI'].includes(current.tagName)) {
                 let childRes = checkChildren(current);
@@ -190,7 +190,7 @@
 
                     if (eventName === 'click') {
                         const finalUrl = processImageUrl(result.url);
-                        
+
                         if (finalUrl) {
                             let finalName = findBestName(result.element);
                             if(finalName === "馍馍就是人间美味") finalName = findBestName(e.target);
@@ -201,7 +201,7 @@
                             const borderColor = isNewDocMode ? '#d13438' : '#0078d4';
                             fx.style.border = `4px solid ${borderColor}`;
                             fx.style.boxShadow = `0 0 15px ${isNewDocMode ? 'rgba(209,52,56,0.6)' : 'rgba(0,120,212,0.6)'}`;
-                            
+
                             const rect = result.element.getBoundingClientRect();
                             Object.assign(fx.style, {
                                 left: rect.left + 'px', top: rect.top + 'px',
@@ -213,7 +213,7 @@
                             // 写入剪贴板
                             let clipboardStr = `PS_IMPORTER:${finalUrl}|||${finalName}`;
                             if (isNewDocMode) clipboardStr += "|||NEW_DOC";
-                            
+
                             GM_setClipboard(clipboardStr);
 
                             GM_notification({
