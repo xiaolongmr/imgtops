@@ -22,22 +22,25 @@ const VersionManager = {
         if (window.cep && window.cep.getCurrentExtensionManifest) {
             try {
                 const manifest = window.cep.getCurrentExtensionManifest();
-                this.currentVersion = manifest.version || '0.1.1';
-                return this.currentVersion;
+                this.currentVersion = manifest.version;
+                if (this.currentVersion) {
+                    return this.currentVersion;
+                }
             } catch (error) {
                 console.warn('无法从插件API获取版本号:', error);
             }
         }
         
-        // 2. 尝试从URL参数或全局变量获取
+        // 2. 尝试从全局变量获取（在ui.js中设置）
         if (window.pluginVersion) {
             this.currentVersion = window.pluginVersion;
             return this.currentVersion;
         }
         
-        // 3. 最后使用默认版本号
-        this.currentVersion = '0.1.1';
-        return this.currentVersion;
+        // 3. 尝试从manifest.json文件获取（通过其他方式）
+        // 这里需要其他机制来获取版本号
+        console.warn('无法自动获取版本号，请确保版本号已正确设置');
+        return null;
     },
     
     // 检查更新
@@ -45,6 +48,12 @@ const VersionManager = {
         try {
             const currentVersion = this.getCurrentVersion();
             console.log('当前版本:', currentVersion);
+            
+            // 如果无法获取当前版本，跳过检查
+            if (!currentVersion) {
+                console.warn('无法获取当前版本，跳过版本检查');
+                return null;
+            }
             
             const response = await fetch(this.manifestUrl);
             if (!response.ok) {

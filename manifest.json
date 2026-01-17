@@ -1,7 +1,7 @@
 {
   "id": "com.simple.importer.v5.final",
   "name": "图片导导 Lite",
-  "version": "0.1.1",
+  "version": "0.1.4",
   "main": "main.html",
   "manifestVersion": 5,
   "host": {
@@ -18,7 +18,7 @@
         "zh-TW": "圖片導導 Lite"
       },
       "minimumSize": { "width": 230, "height": 300 },
-      "maximumSize": { "width": 300, "height": 600 },
+      "maximumSize": { "width": 230, "height": 300 },
       "preferredDockedSize": { "width": 230, "height": 300 },
       "preferredFloatingSize": { "width": 230, "height": 300 },
       "icons": [
