@@ -51,11 +51,29 @@ window.updateUIState = function(isRunning) {
 };
 
 // ==========================================
-// 3. 执行初始化
+// 3. 设置当前版本号
+// ==========================================
+function setCurrentVersion() {
+    // 在PS插件环境中，版本号可以从manifest.json获取
+    // 这里我们设置一个默认版本号，实际部署时应与manifest.json保持一致
+    const currentVersion = '0.1.1'; // 与manifest.json中的版本号保持一致
+    
+    // 设置到VersionManager（如果存在）
+    if (window.VersionManager && window.VersionManager.setCurrentVersion) {
+        window.VersionManager.setCurrentVersion(currentVersion);
+    }
+    
+    // 同时设置到全局变量，供其他模块使用
+    window.pluginVersion = currentVersion;
+}
+
+// ==========================================
+// 4. 执行初始化
 // ==========================================
 document.addEventListener("DOMContentLoaded", () => {
     try {
         initLocalization();
+        setCurrentVersion();
         console.log("UI Initialized");
     } catch (e) {
         console.error("UI Init Error:", e);

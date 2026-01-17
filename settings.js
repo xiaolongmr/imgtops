@@ -1,4 +1,231 @@
 // 设置功能模块
+
+// 版本检查功能
+const VersionManager = {
+    manifestUrl: 'https://xiaolongmr.github.io/imgtops/manifest.json',
+    currentVersion: null, // 动态设置版本号
+    
+    // 设置当前版本（在插件初始化时调用）
+    setCurrentVersion(version) {
+        this.currentVersion = version;
+    },
+    
+    // 获取当前版本
+    getCurrentVersion() {
+        // 如果已经设置过版本号，直接返回
+        if (this.currentVersion) {
+            return this.currentVersion;
+        }
+        
+        // 尝试从不同来源获取版本号
+        // 1. 首先尝试从插件信息中获取
+        if (window.cep && window.cep.getCurrentExtensionManifest) {
+            try {
+                const manifest = window.cep.getCurrentExtensionManifest();
+                this.currentVersion = manifest.version || '0.1.1';
+                return this.currentVersion;
+            } catch (error) {
+                console.warn('无法从插件API获取版本号:', error);
+            }
+        }
+        
+        // 2. 尝试从URL参数或全局变量获取
+        if (window.pluginVersion) {
+            this.currentVersion = window.pluginVersion;
+            return this.currentVersion;
+        }
+        
+        // 3. 最后使用默认版本号
+        this.currentVersion = '0.1.1';
+        return this.currentVersion;
+    },
+    
+    // 检查更新
+    async checkForUpdates() {
+        try {
+            const currentVersion = this.getCurrentVersion();
+            console.log('当前版本:', currentVersion);
+            
+            const response = await fetch(this.manifestUrl);
+            if (!response.ok) {
+                throw new Error('网络请求失败');
+            }
+            
+            const remoteManifest = await response.json();
+            const remoteVersion = remoteManifest.version;
+            console.log('云端版本:', remoteVersion);
+            
+            const result = this.compareVersions(currentVersion, remoteVersion);
+            console.log('版本比较结果:', result);
+            
+            return result;
+        } catch (error) {
+            console.error('版本检查失败:', error);
+            return null;
+        }
+    },
+    
+    // 版本比较
+    compareVersions(current, remote) {
+        const currentParts = current.split('.').map(Number);
+        const remoteParts = remote.split('.').map(Number);
+        
+        for (let i = 0; i < Math.max(currentParts.length, remoteParts.length); i++) {
+            const currentPart = currentParts[i] || 0;
+            const remotePart = remoteParts[i] || 0;
+            
+            if (remotePart > currentPart) {
+                return {
+                    hasUpdate: true,
+                    currentVersion: current,
+                    latestVersion: remote
+                };
+            } else if (remotePart < currentPart) {
+                break;
+            }
+        }
+        
+        return {
+            hasUpdate: false,
+            currentVersion: current,
+            latestVersion: remote
+        };
+    },
+    
+    // 显示更新提示
+    showUpdateNotification(updateInfo) {
+        if (!updateInfo.hasUpdate) return;
+        
+        // 使用左上角消息提示模块，设置为永久显示
+        if (window.notificationManager) {
+            // 保存更新信息，用于后续检查
+            this.currentUpdateInfo = updateInfo;
+            
+            // 显示永久通知（使用很大的超时时间）
+            window.notificationManager.show(
+                `🎉 发现新版本! v${updateInfo.currentVersion} → v${updateInfo.latestVersion}`,
+                'info',
+                9999999999, // 很大的数字，几乎不会自动消失
+                () => {
+                    // 点击后显示公众号二维码弹窗
+                    this.showUpdateModal(updateInfo);
+                }
+            );
+        }
+    },
+    
+    // 隐藏更新提示（当版本一致时调用）
+    hideUpdateNotification() {
+        if (window.notificationManager) {
+            window.notificationManager.hide();
+        }
+        this.currentUpdateInfo = null;
+    },
+    
+    // 显示更新弹窗
+    showUpdateModal(updateInfo) {
+        // 使用与关于我们相同的弹窗样式
+        const modalOverlay = document.createElement('div');
+        modalOverlay.className = 'modal-overlay';
+        modalOverlay.id = 'update-modal-overlay';
+        modalOverlay.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-inner">
+                    <img src="https://wx.z-l.top/qrcode.png" alt="爱吃馍公众号二维码" class="qrcode-img">
+                    <div class="modal-title">获取最新版本</div>
+                    <div class="modal-desc">
+                        发送关键词 【图片导导】
+                        <br>
+                        获取最新版本下载链接
+                    </div>
+
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modalOverlay);
+        
+        // 点击遮罩层关闭
+        modalOverlay.onclick = (e) => {
+            if (e.target === modalOverlay) {
+                this.hideUpdateModal();
+            }
+        };
+        
+        // ESC键关闭
+        document.addEventListener('keydown', this.handleEscapeKey);
+        
+        // 显示弹窗
+        modalOverlay.style.display = 'flex';
+    },
+    
+    // 隐藏更新弹窗
+    hideUpdateModal() {
+        const modalOverlay = document.getElementById('update-modal-overlay');
+        if (modalOverlay) {
+            modalOverlay.remove();
+        }
+        document.removeEventListener('keydown', this.handleEscapeKey);
+    },
+    
+    // ESC键处理
+    handleEscapeKey(e) {
+        if (e.key === 'Escape') {
+            VersionManager.hideUpdateModal();
+        }
+    },
+    
+    // 初始化版本检查
+    async init() {
+        console.log('开始版本检查...');
+        
+        // 测试阶段：暂时禁用每日检查限制
+        // const lastCheck = localStorage.getItem('lastUpdateCheck');
+        // const now = Date.now();
+        // const oneDay = 24 * 60 * 60 * 1000;
+        // 
+        // if (lastCheck && (now - parseInt(lastCheck)) < oneDay) {
+        //     console.log('今天已经检查过版本，跳过检查');
+        //     return;
+        // }
+        // 
+        // localStorage.setItem('lastUpdateCheck', now.toString());
+        
+        const updateInfo = await this.checkForUpdates();
+        console.log('版本检查完成:', updateInfo);
+        
+        if (updateInfo && updateInfo.hasUpdate) {
+            console.log('发现新版本，准备显示提示');
+            setTimeout(() => {
+                this.showUpdateNotification(updateInfo);
+                // 启动定期检查，当版本一致时自动隐藏提示
+                this.startPeriodicCheck();
+            }, 2000); // 延迟2秒显示，确保界面加载完成
+        } else {
+            console.log('没有发现新版本或检查失败');
+            // 如果没有更新，检查是否需要隐藏之前的提示
+            if (this.currentUpdateInfo) {
+                this.hideUpdateNotification();
+            }
+        }
+    },
+    
+    // 启动定期版本检查
+    startPeriodicCheck() {
+        // 每5分钟检查一次版本
+        this.periodicCheckInterval = setInterval(async () => {
+            console.log('定期版本检查...');
+            const updateInfo = await this.checkForUpdates();
+            
+            if (!updateInfo || !updateInfo.hasUpdate) {
+                console.log('版本已一致，隐藏更新提示');
+                this.hideUpdateNotification();
+                clearInterval(this.periodicCheckInterval);
+            }
+        }, 5 * 60 * 1000); // 5分钟
+    }
+};
+
 class SettingsManager {
     constructor() {
         this.settings = {
@@ -350,6 +577,83 @@ class SettingsManager {
                 padding: 10px;
                 border-bottom: none;
             }
+
+            /* 更新提示样式 */
+            .update-notification {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 10000;
+                background: #2a2a2a;
+                border: 1px solid #2da970;
+                border-radius: 8px;
+                padding: 15px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                max-width: 300px;
+                animation: slideInRight 0.3s ease-out;
+            }
+
+            @keyframes slideInRight {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+
+            .update-content {
+                color: #fff;
+            }
+
+            .update-title {
+                font-size: 14px;
+                font-weight: bold;
+                margin-bottom: 8px;
+                color: #2da970;
+            }
+
+            .update-info {
+                font-size: 12px;
+                margin-bottom: 12px;
+                color: #ccc;
+            }
+
+            .update-actions {
+                display: flex;
+                gap: 8px;
+            }
+
+            .update-btn, .update-later-btn {
+                padding: 6px 12px;
+                border: none;
+                border-radius: 4px;
+                font-size: 12px;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+
+            .update-btn {
+                background: #2da970;
+                color: white;
+            }
+
+            .update-btn:hover {
+                background: #1e7a50;
+            }
+
+            .update-later-btn {
+                background: #555;
+                color: #ccc;
+            }
+
+            .update-later-btn:hover {
+                background: #666;
+            }
+
+
         `;
 
         document.head.appendChild(styles);
@@ -516,10 +820,15 @@ class SettingsManager {
 
 // 全局消息提示工具
 class NotificationManager {
-    static show(message, type = 'success', duration = 2000) {
+    static show(message, type = 'success', duration = 2000, onClick = null) {
         const notification = document.createElement('div');
         notification.textContent = message;
         notification.className = 'notification-message';
+        
+        // 如果有点击回调，添加指针样式
+        if (onClick) {
+            notification.style.cursor = 'pointer';
+        }
         
         // 基础样式
          notification.style.cssText = `
@@ -556,20 +865,41 @@ class NotificationManager {
 
         document.body.appendChild(notification);
 
+        // 点击事件处理
+        if (onClick) {
+            notification.onclick = () => {
+                onClick();
+                // 点击后不移除通知，保持显示
+                // 通知会一直显示直到版本一致
+            };
+        }
+
         // 淡入
         setTimeout(() => {
             notification.style.opacity = '1';
         }, 10);
 
-        // 指定时间后淡出并移除
-        setTimeout(() => {
-            notification.style.opacity = '0';
+        // 指定时间后淡出并移除（如果没有点击回调或者duration>0）
+        if (duration > 0 && !onClick) {
             setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
-            }, 300);
-        }, duration);
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, duration);
+        }
+    }
+    
+    // 隐藏所有通知
+    static hide() {
+        const notifications = document.querySelectorAll('.notification-message');
+        notifications.forEach(notification => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        });
     }
 }
 
@@ -577,4 +907,7 @@ class NotificationManager {
 document.addEventListener('DOMContentLoaded', () => {
     window.settingsManager = new SettingsManager();
     window.notificationManager = NotificationManager;
+    
+    // 初始化版本检查
+    VersionManager.init();
 });
