@@ -5,7 +5,7 @@
     "start": "开启自动监控",
     "stop": "停止自动监控",
     "listening": "⚡ 正在监听剪贴板...",
-    "processing": "⚡ 正在同步: ",
+    "downloading": "⚡ 正在下载: ",
     "footer": "Via 公众号：爱吃馍",
     "success": "处理完成: ",
     "layerName": "未命名",

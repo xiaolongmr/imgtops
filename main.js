@@ -131,7 +131,7 @@
                         lastUrl = currentUrl; 
                         
                         // 临时显示处理状态
-                        if (st) st.innerText = `${i18nMain.processing}${currentName}...`;
+                        if (st) st.innerText = `${i18nMain.downloading}${currentName}...`;
                         
                         await autoImportTask(currentUrl, currentName, isForceNew);
                         

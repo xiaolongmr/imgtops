@@ -5,7 +5,7 @@
     "start": "開啟自動監控",
     "stop": "停止自動監控",
     "listening": "⚡ 正在監聽剪貼簿...",
-    "processing": "⚡ 正在同步: ",
+    "downloading": "⚡ 正在下載: ",
     "footer": "Via 公眾號：愛吃饃",
     "success": "處理完成: ",
     "layerName": "未命名",
