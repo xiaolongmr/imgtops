@@ -2,7 +2,7 @@
   "id": "com.simple.importer.v5.final",
   "name": "图片导导 Lite",
   "version": "0.1",
-  "main": "index.html",
+  "main": "main.html",
   "manifestVersion": 5,
   "host": {
     "app": "PS",
