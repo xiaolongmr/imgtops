@@ -9,5 +9,10 @@
     "footer": "Via 公眾號：愛吃饃",
     "success": "處理完成: ",
     "layerName": "未命名",
-    "filePrefix": "Via公眾號：愛吃饃"
+    "filePrefix": "Via公眾號：愛吃饃",
+    "queueAdded": "已添加到隊列: ",
+    "queueProcessing": "下載中: ",
+    "queueStatus": "隊列: ",
+    "queueProcessingText": "處理中",
+    "queueWaitingText": "等待"
 }

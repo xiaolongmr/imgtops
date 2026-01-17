@@ -9,5 +9,10 @@
     "footer": "Via: AiChiMo",
     "success": "Processed: ",
     "layerName": "Unnamed",
-    "filePrefix": "Via_AiChiMo"
+    "filePrefix": "Via_AiChiMo",
+    "queueAdded": "Added to queue: ",
+    "queueProcessing": "Downloading: ",
+    "queueStatus": "Queue: ",
+    "queueProcessingText": "processing",
+    "queueWaitingText": "waiting"
 }

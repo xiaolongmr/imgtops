@@ -10,6 +10,124 @@
     let lastUrl = ""; 
     let isAutoRunning = false; // 状态标记
     let lastCreatedFileEntry = null;
+    
+    // ==========================================
+    // 下载队列管理系统
+    // ==========================================
+    let downloadQueue = [];
+    let isProcessingQueue = false;
+
+    // 添加任务到队列
+    function addToQueue(url, layerName, forceNewDoc = false) {
+        const taskId = Date.now() + Math.random().toString(36).substr(2, 9);
+        const task = {
+            id: taskId,
+            url: url,
+            layerName: layerName,
+            forceNewDoc: forceNewDoc,
+            status: 'pending', // pending, processing, completed, failed
+            addedTime: new Date()
+        };
+        
+        downloadQueue.push(task);
+        console.log(`任务已添加到队列: ${layerName} (队列长度: ${downloadQueue.length})`);
+        
+        // 更新UI显示队列状态
+        updateQueueUI();
+        
+        // 如果队列未在处理中，开始处理
+        if (!isProcessingQueue) {
+            processQueue();
+        }
+        
+        return taskId;
+    }
+
+    // 处理队列
+    async function processQueue() {
+        if (isProcessingQueue || downloadQueue.length === 0) {
+            return;
+        }
+        
+        isProcessingQueue = true;
+        
+        while (downloadQueue.length > 0) {
+            const currentTask = downloadQueue[0];
+            
+            // 跳过已处理的任务
+            if (currentTask.status === 'completed' || currentTask.status === 'failed') {
+                downloadQueue.shift();
+                continue;
+            }
+            
+            // 更新任务状态为处理中
+            currentTask.status = 'processing';
+            updateQueueUI();
+            
+            try {
+                // 更新UI显示当前处理任务
+                const st = document.getElementById("st");
+                if (st) st.innerText = `${i18nMain.queueProcessing}${truncateText(currentTask.layerName)}`;
+                
+                await autoImportTask(currentTask.url, currentTask.layerName, currentTask.forceNewDoc);
+                
+                // 标记任务完成
+                currentTask.status = 'completed';
+                currentTask.completedTime = new Date();
+                
+                console.log(`队列任务完成: ${currentTask.layerName}`);
+                
+                // 从队列中移除已完成的任务
+                downloadQueue.shift();
+                
+                // 更新UI
+                updateQueueUI();
+                
+            } catch (error) {
+                console.error(`队列任务失败: ${currentTask.layerName}`, error);
+                currentTask.status = 'failed';
+                currentTask.error = error.message;
+                
+                // 失败的任务也移除
+                downloadQueue.shift();
+                
+                updateQueueUI();
+            }
+            
+            // 处理完一个任务后等待一下，避免过快处理
+            await new Promise(resolve => setTimeout(resolve, 500));
+        }
+        
+        isProcessingQueue = false;
+        
+        // 队列处理完成后，恢复监听状态
+        const st = document.getElementById("st");
+        if (st && isAutoRunning) st.innerText = i18nMain.listening;
+    }
+
+    // 更新队列UI显示
+    function updateQueueUI() {
+        const queueInfo = document.getElementById('queue-info');
+        
+        if (queueInfo) {
+            const totalCount = downloadQueue.length;
+            
+            if (totalCount > 0) {
+                queueInfo.innerText = `队列: 剩余${totalCount}个`;
+                queueInfo.style.display = 'block';
+            } else {
+                queueInfo.style.display = 'none';
+            }
+        }
+    }
+
+    // 处理长文本，添加省略号
+    function truncateText(text, maxLength = 20) {
+        if (!text || text.length <= maxLength) {
+            return text;
+        }
+        return text.substring(0, maxLength) + '...';
+    }
 
     // ==========================================
     // 1. 核心功能 (导入任务 - 保持不变)
@@ -130,13 +248,11 @@
                     if (currentUrl !== lastUrl) {
                         lastUrl = currentUrl; 
                         
-                        // 临时显示处理状态
-                        if (st) st.innerText = `${i18nMain.downloading}${currentName}...`;
+                        // 使用队列系统而不是直接处理
+                        addToQueue(currentUrl, currentName, isForceNew);
                         
-                        await autoImportTask(currentUrl, currentName, isForceNew);
-                        
-                        // 恢复“监听中”状态 (如果还没停止的话)
-                        if (isAutoRunning && st) st.innerText = i18nMain.listening; 
+                        // 显示队列状态
+                        if (st) st.innerText = `${i18nMain.queueAdded}${truncateText(currentName)}`; 
                     }
                 }
             } catch (err) {

@@ -9,5 +9,10 @@
     "footer": "Via 公众号：爱吃馍",
     "success": "处理完成: ",
     "layerName": "未命名",
-    "filePrefix": "Via公众号：爱吃馍" 
+    "filePrefix": "Via公众号：爱吃馍",
+    "queueAdded": "已添加到队列: ",
+    "queueProcessing": "下载中: ",
+    "queueStatus": "队列: ",
+    "queueProcessingText": "处理中",
+    "queueWaitingText": "等待"
 }
