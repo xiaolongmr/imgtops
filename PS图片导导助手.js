@@ -155,6 +155,26 @@
     }
 
     /**
+     * 处理花瓣网图片URL优化
+     * @param {string} url - 原始URL
+     * @returns {string} 优化后的URL
+     */
+    function optimizeHuabanUrl(url) {
+        let cleanUrl = url;
+        
+        // 花瓣网处理规则：删除 _fwxxxwebp 参数
+        // 示例：https://gd-hbimg-edge.huaban.com/78849c45be7f2a825a4bf09bf06baf797ae6424e20ac11-PPxFsF_fw658webp
+        const huabanPattern = /_(fw\d+)(jpg|jpeg|png|webp|gif)/;
+        if (huabanPattern.test(cleanUrl)) {
+            // 删除 _fwxxxwebp 参数，保留原始图片ID
+            cleanUrl = cleanUrl.replace(/_(fw\d+)(jpg|jpeg|png|webp|gif)/, '');
+            console.log("花瓣网图片处理: 删除_fwxxxwebp参数");
+        }
+        
+        return cleanUrl;
+    }
+
+    /**
      * 处理图片URL，优化各种平台的特殊格式
      * @param {string} url - 原始图片URL
      * @returns {string|null} 处理后的URL或base64数据
@@ -172,7 +192,21 @@
             return null;
         }
 
-        // 检查URL是否包含图片格式后缀，如果没有则转换为base64
+        // 先检查是否为特殊平台的URL，自定义规则优先
+        if (cleanUrl.includes("gd-filems.dancf.com")) return cleanUrl.split('?')[0];
+        if (cleanUrl.includes(".hdslb.com")) return cleanUrl.split('@')[0];
+        if (cleanUrl.includes("360buyimg.com")) return optimizeJdUrl(cleanUrl);
+        if (cleanUrl.includes("alicdn.com")) return optimizeTaobaoUrl(cleanUrl);
+        if (cleanUrl.includes("amazon.com") && (cleanUrl.includes("/images/I/") || cleanUrl.includes("/images/S/"))) {
+            return optimizeAmazonUrl(cleanUrl);
+        }
+        
+        // 处理花瓣网图片（自定义规则优先）
+        if (cleanUrl.includes("huaban.com") || cleanUrl.includes("hbimg-edge")) {
+            return optimizeHuabanUrl(cleanUrl);
+        }
+
+        // 通用处理：检查URL是否包含图片格式后缀，如果没有则转换为base64
         if (!hasImageExtension(cleanUrl)) {
             console.log('检测到无图片格式后缀的URL，尝试转换为base64:', cleanUrl);
             const base64Data = await urlToBase64(cleanUrl);
@@ -180,15 +214,6 @@
                 return base64Data;
             }
             return cleanUrl; // 转换失败返回原始URL
-        }
-
-        // 各平台URL优化处理
-        if (cleanUrl.includes("gd-filems.dancf.com")) return cleanUrl.split('?')[0];
-        if (cleanUrl.includes(".hdslb.com")) return cleanUrl.split('@')[0];
-        if (cleanUrl.includes("360buyimg.com")) return optimizeJdUrl(cleanUrl);
-        if (cleanUrl.includes("alicdn.com")) return optimizeTaobaoUrl(cleanUrl);
-        if (cleanUrl.includes("amazon.com") && (cleanUrl.includes("/images/I/") || cleanUrl.includes("/images/S/"))) {
-            return optimizeAmazonUrl(cleanUrl);
         }
 
         return cleanUrl;
