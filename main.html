@@ -30,14 +30,7 @@
             box-sizing: border-box;
         }
 
-        /* 隐藏调整大小手柄 */
-        body::-webkit-resizer {
-            display: none !important;
-        }
-        
-        body::after {
-            display: none !important;
-        }
+
 
         .container {
             width: 100%;
@@ -181,6 +174,20 @@
             margin-top: 10px;
         }
         
+        /* 版本号显示样式 */
+        .version-info {
+            font-size: 10px;
+            color: #666;
+            margin-top: 8px;
+            text-align: center;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+        
+        .version-info:hover {
+            opacity: 0.9;
+        }
+        
         /* 右上角图标样式 */
         .info-icon {
             position: absolute;
@@ -302,6 +309,10 @@
             <button id="settings" class="btn-settings" title="设置">⚙️</button>
             <button id="go" class="btn-main">Start Monitoring</button>
         </div>
+        
+        <!-- 版本号显示 -->
+        <div class="version-info" id="version-info">v<span id="version-number"></span></div>
+        
     </div>
 
     <!-- 1. 先引入 UI 逻辑 (初始化界面、动画) -->

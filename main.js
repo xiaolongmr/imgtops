@@ -7,10 +7,7 @@
     
     const i18nMain = require("./locales/index.js");
     
-    // 隐藏调整大小手柄（通过CSS和manifest设置实现）
-     function hideResizeGripper() {
-         console.log('调整大小手柄已通过CSS和manifest设置隐藏');
-     }
+
 
     let lastUrl = ""; 
     let isAutoRunning = false; // 状态标记
@@ -313,9 +310,6 @@
         goBtn.onclick = toggleMonitoring;
     }
 
-    // 插件加载完成后隐藏调整大小手柄
-    setTimeout(() => {
-        hideResizeGripper();
-    }, 1000);
+
 
 })();

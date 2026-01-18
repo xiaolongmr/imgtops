@@ -54,9 +54,17 @@ window.updateUIState = function(isRunning) {
 // 3. 设置当前版本号
 // ==========================================
 function setCurrentVersion() {
-    // 在PS插件环境中，版本号可以从manifest.json获取
-    // 这里我们设置一个默认版本号，实际部署时应与manifest.json保持一致
-    const currentVersion = '0.1.1'; // 与manifest.json中的版本号保持一致
+    let currentVersion = null;
+    
+    // 方法1: 使用manifest.json中的版本信息
+    try {
+        const manifest = require('./manifest.json');
+        currentVersion = manifest.version;
+        console.log('从manifest.json获取版本号:', currentVersion);
+    } catch (error) {
+        console.warn('无法从manifest.json获取版本号:', error);
+        currentVersion = '0.1.4';
+    }
     
     // 设置到VersionManager（如果存在）
     if (window.VersionManager && window.VersionManager.setCurrentVersion) {
@@ -65,6 +73,14 @@ function setCurrentVersion() {
     
     // 同时设置到全局变量，供其他模块使用
     window.pluginVersion = currentVersion;
+    
+    // 更新界面上的版本号显示
+    const versionElement = document.getElementById('version-number');
+    if (versionElement) {
+        versionElement.textContent = currentVersion;
+    }
+    
+    console.log('当前插件版本已设置为:', currentVersion);
 }
 
 // ==========================================

@@ -17,29 +17,13 @@ const VersionManager = {
             return this.currentVersion;
         }
         
-        // 尝试从不同来源获取版本号
-        // 1. 首先尝试从插件信息中获取
-        if (window.cep && window.cep.getCurrentExtensionManifest) {
-            try {
-                const manifest = window.cep.getCurrentExtensionManifest();
-                this.currentVersion = manifest.version;
-                if (this.currentVersion) {
-                    return this.currentVersion;
-                }
-            } catch (error) {
-                console.warn('无法从插件API获取版本号:', error);
-            }
-        }
-        
-        // 2. 尝试从全局变量获取（在ui.js中设置）
+        // 直接从全局变量获取（由ui.js设置）
         if (window.pluginVersion) {
             this.currentVersion = window.pluginVersion;
             return this.currentVersion;
         }
         
-        // 3. 尝试从manifest.json文件获取（通过其他方式）
-        // 这里需要其他机制来获取版本号
-        console.warn('无法自动获取版本号，请确保版本号已正确设置');
+        console.warn('无法获取版本号，请确保版本号已正确设置');
         return null;
     },
     
@@ -112,7 +96,7 @@ const VersionManager = {
             
             // 显示永久通知（使用很大的超时时间）
             window.notificationManager.show(
-                `🎉 发现新版本! v${updateInfo.currentVersion} → v${updateInfo.latestVersion}`,
+                `🎉 发现新版本!  v${updateInfo.currentVersion} → v${updateInfo.latestVersion}`,
                 'info',
                 9999999999, // 很大的数字，几乎不会自动消失
                 () => {
