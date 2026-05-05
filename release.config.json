@@ -1,0 +1,17 @@
+{
+  "name": "imgtops",
+  "include": [
+    "图片导导",
+    "一键安装.jsx"
+  ],
+  "exclude": [
+    ".vscode",
+    ".github",
+    "README.md",
+    "vercel.json",
+    ".gitignore"
+  ],
+  "full_package": {
+    "include": ["install"]
+  }
+}
