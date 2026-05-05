@@ -1,0 +1,650 @@
+<html lang="zh-CN"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PS图片导导助手 - 专业设计师的浏览器到Photoshop图片导入解决方案</title>
+    <meta name="description" content="PS图片导导助手是一款革命性的浏览器到Photoshop图片导入工具，专为设计师、电商美工、内容创作者打造，一键导入，告别繁琐流程。">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- AOS Animation -->
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1e88e5',
+                        secondary: '#0d47a1',
+                        light: '#e3f2fd',
+                        dark: '#0d47a1',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'custom': '0 10px 30px -5px rgba(30, 136, 229, 0.3)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-gradient {
+                background-clip: text;
+                -webkit-background-clip: text;
+                color: transparent;
+                background-image: linear-gradient(135deg, #1e88e5, #0d47a1);
+            }
+            .bg-gradient {
+                background-image: linear-gradient(135deg, #1e88e5, #0d47a1);
+            }
+            .transition-all-300 {
+                transition: all 0.3s ease;
+            }
+            .hover-scale {
+                transition: transform 0.3s ease;
+            }
+            .hover-scale:hover {
+                transform: scale(1.03);
+            }
+            .animate-blob {
+                animation: blob 7s infinite;
+            }
+            .animation-delay-2000 {
+                animation-delay: 2s;
+            }
+            .animation-delay-4000 {
+                animation-delay: 4s;
+            }
+            @keyframes blob {
+                0% {
+                    transform: translate(0px, 0px) scale(1);
+                }
+                33% {
+                    transform: translate(30px, -50px) scale(1.1);
+                }
+                66% {
+                    transform: translate(-20px, 20px) scale(0.9);
+                }
+                100% {
+                    transform: translate(0px, 0px) scale(1);
+                }
+            }
+            
+            /* 网格动画 */
+            .animate-grid {
+                animation: gridMove 20s linear infinite;
+            }
+            
+            @keyframes gridMove {
+                0% {
+                    background-position: 0 0;
+                }
+                100% {
+                    background-position: 60px 60px;
+                }
+            }
+            
+            /* 浮动动画 */
+            .animate-float {
+                animation: float 6s ease-in-out infinite;
+            }
+            
+            @keyframes float {
+                0%, 100% {
+                    transform: translateY(0) translateX(0);
+                }
+                25% {
+                    transform: translateY(-20px) translateX(10px);
+                }
+                50% {
+                    transform: translateY(10px) translateX(-10px);
+                }
+                75% {
+                    transform: translateY(-10px) translateX(20px);
+                }
+            }
+        }
+    </style>
+</head>
+<body class="font-sans text-gray-800 bg-gray-50">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-md fixed w-full z-50">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <img src="https://cdn.h5ds.com/space/files/600972551685382144/20260505/975989122833813504.png" alt="PS图片导导助手" class="h-10">
+                    <span class="text-xl font-bold text-primary">PS图片导导</span>
+                </div>
+                
+                <!-- 桌面导航 -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="#home" class="text-gray-700 hover:text-primary transition-all-300">首页</a>
+                    <a href="#features" class="text-gray-700 hover:text-primary transition-all-300">功能</a>
+                    <a href="#how-it-works" class="text-gray-700 hover:text-primary transition-all-300">使用</a>
+                    <button id="downloadBtn" class="bg-primary hover:bg-secondary text-white px-6 py-2 rounded-full transition-all-300">获取</button>
+                </div>
+                
+                <!-- 移动端菜单按钮 -->
+                <div class="md:hidden">
+                    <button id="menu-toggle" class="text-gray-700 focus:outline-none">
+                        <i class="fa fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 移动端导航菜单 -->
+            <div id="mobile-menu" class="md:hidden hidden pt-4 pb-2">
+                <a href="#home" class="block py-2 text-gray-700 hover:text-primary">首页</a>
+                <a href="#features" class="block py-2 text-gray-700 hover:text-primary">功能</a>
+                <a href="#how-it-works" class="block py-2 text-gray-700 hover:text-primary">使用</a>
+                <button id="mobileDownloadBtn" class="block py-2 mt-2 bg-primary hover:bg-secondary text-white px-4 rounded-md text-center">获取</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 公众号弹窗 (默认隐藏) -->
+    <div id="qrcodeModal" class="fixed inset-0 bg-black/70 z-[9999] flex items-center justify-center opacity-0 invisible transition-all duration-300">
+        <div class="bg-white rounded-xl p-6 md:p-8 w-[90%] max-w-sm shadow-2xl relative transform transition-transform duration-300 scale-95">
+            <!-- 关闭按钮 -->
+            <button id="closeModal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 transition-all">
+                <i class="fa fa-times text-xl"></i>
+            </button>
+            <!-- 弹窗内容 -->
+            <div class="text-center">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">获取下载方式</h3>
+                <p class="text-gray-600 mb-6 text-sm md:text-base">关注【爱吃馍】公众号<br>发送关键词 <span class="text-primary font-bold">#图片导导</span> 即可获取</p>
+                <img src="https://wx.z-l.top/qrcode.png" alt="爱吃馍公众号二维码" class="w-[220px] h-[220px] mx-auto rounded-lg border border-gray-100" onerror="this.src='assets/qrcode.jpg'">
+            </div>
+        </div>
+    </div>
+
+    <!-- 英雄区 -->
+    <section id="home" class="min-h-screen flex items-center pt-0 pb-0 relative overflow-hidden">
+        <!-- 高级背景 -->
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.8),transparent_80%)]"></div>
+        
+        <!-- 动态Blob元素 -->
+        <div class="absolute -top-40 -right-40 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+        <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
+        
+        <!-- 动态网格背景 -->
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0aDR2MWgtNHYtMXptMC0yaDF2NGgtMXYtNHptMi0yaDF2NGgtMXYtNHptLTQgMmgxdjRoLTF2LTR6bS0yIDJoMXY0aC0xdi00em0tNCAyaDF2NGgtMXYtNHptMi0yaDF2NGgtMXYtNHptLTQgMmgxdjRoLTF2LTR6bS0yIDJoMXY0aC0xdi00em0tNCAyaDF2NGgtMXYtNHptMi0yaDF2NGgtMXYtNHptLTQgMmgxdjRoLTF2LTR6bS0yIDJoMXY0aC0xdi00em0tNCAyaDF2NGgtMXYtNHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-30 animate-grid"></div>
+        
+        <!-- 动态浮动元素 -->
+        <div class="absolute top-1/4 left-1/4 w-4 h-4 bg-blue-400 rounded-full opacity-60 animate-float animation-delay-1000"></div>
+        <div class="absolute top-1/3 right-1/3 w-3 h-3 bg-indigo-400 rounded-full opacity-60 animate-float animation-delay-2000"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-5 h-5 bg-purple-400 rounded-full opacity-60 animate-float animation-delay-3000"></div>
+        <div class="absolute bottom-1/3 left-1/3 w-2 h-2 bg-blue-300 rounded-full opacity-60 animate-float animation-delay-4000"></div>
+        <div class="absolute top-1/2 left-1/5 w-3 h-3 bg-indigo-300 rounded-full opacity-60 animate-float animation-delay-5000"></div>
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center relative z-10">
+                <div class="md:w-1/2 mb-8 md:mb-0" data-aos="fade-right" data-aos-duration="1000">
+                    <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight">
+                        网页图片到<span class="text-primary">Photoshop</span><br>
+                        一键导入解决方案
+                    </h1>
+                    <p class="text-base md:text-lg text-gray-600 mb-6">
+                        告别繁琐的下载-保存-拖拽流程，让设计工作更加高效流畅。
+                    </p>
+                    <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
+                        <button id="heroDownloadBtn" class="bg-primary hover:bg-secondary text-white text-center px-6 py-3 rounded-full text-base font-medium transition-all-300 shadow-custom">
+                            <i class="fa fa-download mr-2"></i>立即获取
+                        </button>
+                        <a href="#how-it-works" class="border-2 border-primary text-primary hover:bg-primary hover:text-white text-center px-6 py-3 rounded-full text-base font-medium transition-all-300">
+                            <i class="fa fa-info-circle mr-2"></i>了解更多
+                        </a>
+                    </div>
+                </div>
+                <div class="md:w-1/2" data-aos="fade-left" data-aos-duration="1000">
+                    <img src="https://cdn.h5ds.com/space/files/600972551685382144/20260505/975988511514185728.png" alt="PS图片导导助手工作流程" class="w-full rounded-lg shadow-xl hover-scale">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 核心价值 -->
+    <section class="py-12 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12" data-aos="fade-up">
+                <h2 class="text-2xl md:text-3xl font-bold mb-3">核心优势</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-light rounded-xl p-6 shadow-custom hover-scale" data-aos="fade-up" data-aos-delay="100">
+                    <div class="w-14 h-14 bg-primary rounded-full flex items-center justify-center mb-4">
+                        <i class="fa fa-bolt text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-3">效率提升</h3>
+                    <p class="text-gray-600 text-sm">
+                        一键导入，告别繁琐的下载-保存-拖拽流程。
+                    </p>
+                </div>
+                
+                <div class="bg-light rounded-xl p-6 shadow-custom hover-scale" data-aos="fade-up" data-aos-delay="200">
+                    <div class="w-14 h-14 bg-primary rounded-full flex items-center justify-center mb-4">
+                        <i class="fa fa-image text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-3">质量保证</h3>
+                    <p class="text-gray-600 text-sm">
+                        智能优化各大平台图片URL，获取最高质量资源。
+                    </p>
+                </div>
+                
+                <div class="bg-light rounded-xl p-6 shadow-custom hover-scale" data-aos="fade-up" data-aos-delay="300">
+                    <div class="w-14 h-14 bg-primary rounded-full flex items-center justify-center mb-4">
+                        <i class="fa fa-cogs text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-3">工作流优化</h3>
+                    <p class="text-gray-600 text-sm">
+                        智能队列管理，支持批量处理，提升工作连续性。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 功能特色 -->
+    <section id="features" class="py-12 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12" data-aos="fade-up">
+                <h2 class="text-2xl md:text-3xl font-bold mb-3">主要功能</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- 功能1 -->
+                <div class="flex flex-col md:flex-row items-center" data-aos="fade-right">
+                    <div class="md:w-1/3 mb-4 md:mb-0 flex justify-center">
+                        <div class="w-20 h-20 bg-primary rounded-full flex items-center justify-center">
+                            <i class="fa fa-list-alt text-white text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="md:w-2/3 md:pl-6">
+                        <h3 class="text-xl font-bold mb-3">智能队列管理</h3>
+                        <ul class="space-y-2 text-gray-600 text-sm">
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                                <span>多图片按顺序自动排队处理</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                                <span>实时显示下载进度和状态</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- 功能2 -->
+                <div class="flex flex-col md:flex-row items-center" data-aos="fade-left">
+                    <div class="md:w-1/3 mb-4 md:mb-0 flex justify-center">
+                        <div class="w-20 h-20 bg-primary rounded-full flex items-center justify-center">
+                            <i class="fa fa-globe text-white text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="md:w-2/3 md:pl-6">
+                        <h3 class="text-xl font-bold mb-3">多平台图片优化</h3>
+                        <ul class="space-y-2 text-gray-600 text-sm">
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                                <span>电商平台URL智能优化</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                                <span>社交媒体图片格式自动处理</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- 功能3 -->
+                <div class="flex flex-col md:flex-row items-center" data-aos="fade-right">
+                    <div class="md:w-1/3 mb-4 md:mb-0 flex justify-center">
+                        <div class="w-20 h-20 bg-primary rounded-full flex items-center justify-center">
+                            <i class="fa fa-exchange text-white text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="md:w-2/3 md:pl-6">
+                        <h3 class="text-xl font-bold mb-3">格式智能转换</h3>
+                        <ul class="space-y-2 text-gray-600 text-sm">
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                                <span>自动识别并转换各种图片格式</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                                <span>支持主流图片格式和特殊编码</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- 功能4 -->
+                <div class="flex flex-col md:flex-row items-center" data-aos="fade-left">
+                    <div class="md:w-1/3 mb-4 md:mb-0 flex justify-center">
+                        <div class="w-20 h-20 bg-primary rounded-full flex items-center justify-center">
+                            <i class="fa fa-keyboard-o text-white text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="md:w-2/3 md:pl-6">
+                        <h3 class="text-xl font-bold mb-3">便捷操作方式</h3>
+                        <ul class="space-y-2 text-gray-600 text-sm">
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                                <span>Ctrl + 左键：当前文档导入</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                                <span>Ctrl + Alt + 左键：新建文档导入</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 工作流程 -->
+    <section id="how-it-works" class="py-12 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-10" data-aos="fade-up">
+                <h2 class="text-2xl md:text-3xl font-bold mb-3">使用教程</h2>
+                <p class="text-base text-gray-600 max-w-2xl mx-auto">
+                    简单三步，开启高效设计之旅
+                </p>
+            </div>
+            
+       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- 步骤1 -->
+            <div class="bg-light rounded-xl p-6 shadow-custom hover-scale" data-aos="fade-up" data-aos-delay="100">
+                <div class="flex justify-center mb-4">
+                    <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center">
+                        <span class="text-white text-xl font-bold">1</span>
+                    </div>
+                </div>
+                <h3 class="text-lg font-bold mb-3 text-center">安装用户脚本</h3>
+                <ol class="space-y-2 text-gray-600 list-decimal list-inside text-sm">
+                    <li>安装脚本管理器：<a href="https://scriptcat.org/zh-CN" target="_blank" class="text-primary hover:underline">脚本猫</a> or <a href="https://www.tampermonkey.net/" target="_blank" class="text-primary hover:underline">篡改猴</a></li>
+                    <li>获取并安装用户脚本：<a href="https://scriptcat.org/zh-CN/script-show-page/5264" target="_blank" class="text-primary hover:underline">点我去安装脚本</a></li>
+                </ol>
+            </div>
+                
+                <!-- 步骤2 -->
+                <div class="bg-light rounded-xl p-6 shadow-custom hover-scale" data-aos="fade-up" data-aos-delay="200">
+                    <div class="flex justify-center mb-4">
+                        <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center">
+                            <span class="text-white text-xl font-bold">2</span>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-bold mb-3 text-center">安装PS插件</h3>
+                    <ol class="space-y-2 text-gray-600 list-decimal list-inside text-sm">
+                        <li>下载最新版PS插件压缩包</li>
+                        <li>解压并复制到PS插件目录</li>
+                        <li>运行权限注册表文件</li>
+                    </ol>
+                </div>
+                
+                <!-- 步骤3 -->
+                <div class="bg-light rounded-xl p-6 shadow-custom hover-scale" data-aos="fade-up" data-aos-delay="300">
+                    <div class="flex justify-center mb-4">
+                        <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center">
+                            <span class="text-white text-xl font-bold">3</span>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-bold mb-3 text-center">开始使用</h3>
+                    <ol class="space-y-2 text-gray-600 list-decimal list-inside text-sm">
+                        <li>启动PS，开启"图片导导"检测功能</li>
+                        <li>Ctrl+点击图片导入</li>
+                        <li>Ctrl+Alt+点击图片新文件导入</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 兼容性 -->
+    <section class="py-10 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-8" data-aos="fade-up">
+                <h2 class="text-2xl md:text-3xl font-bold mb-3">兼容性支持</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Photoshop版本 -->
+                <div class="bg-white rounded-xl p-5 shadow-custom hover-scale" data-aos="fade-up" data-aos-delay="100">
+                    <div class="flex justify-center mb-4">
+                        <div class="w-14 h-14 bg-primary rounded-full flex items-center justify-center">
+                            <i class="fa fa-paint-brush text-white text-xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-bold mb-3 text-center">支持Photoshop版本</h3>
+                    <ul class="space-y-1 text-gray-600 text-center text-sm">
+                        <li>Photoshop 2022版至最新版~</li>
+                    </ul>
+                </div>
+                
+                <!-- 浏览器支持 -->
+                <div class="bg-white rounded-xl p-5 shadow-custom hover-scale" data-aos="fade-up" data-aos-delay="200">
+                    <div class="flex justify-center mb-4">
+                        <div class="w-14 h-14 bg-primary rounded-full flex items-center justify-center">
+                            <i class="fa fa-chrome text-white text-xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-bold mb-3 text-center">浏览器支持</h3>
+                    <ul class="space-y-1 text-gray-600 text-center text-sm">
+                        <li>Chrome、Firefox、Edge等</li>
+                        <li>支持Tampermonkey的浏览器</li>
+                    </ul>
+                </div>
+                
+                <!-- 操作系统 -->
+                <div class="bg-white rounded-xl p-5 shadow-custom hover-scale" data-aos="fade-up" data-aos-delay="300">
+                    <div class="flex justify-center mb-4">
+                        <div class="w-14 h-14 bg-primary rounded-full flex items-center justify-center">
+                            <i class="fa fa-desktop text-white text-xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-bold mb-3 text-center">操作系统</h3>
+                    <ul class="space-y-1 text-gray-600 text-center text-sm">
+                        <li>Windows 10/11</li>
+                        <li>macOS 10.15+</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 技术支持 -->
+    <section id="support" class="py-10 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-8" data-aos="fade-up">
+                <h2 class="text-2xl md:text-3xl font-bold mb-3">技术支持</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- 官方渠道 -->
+                <div class="bg-light rounded-xl p-6 shadow-custom hover-scale" data-aos="fade-up" data-aos-delay="100">
+                    <div class="flex justify-center mb-4">
+                        <div class="w-14 h-14 bg-primary rounded-full flex items-center justify-center">
+                            <i class="fa fa-weixin text-white text-xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-bold mb-3 text-center">微信公众号</h3>
+                    <p class="text-gray-600 text-center text-sm">
+                        关注"爱吃馍"获取最新版本更新和技术支持
+                    </p>
+                </div>
+                
+                <!-- 常见问题 -->
+                <div class="bg-light rounded-xl p-6 shadow-custom hover-scale" data-aos="fade-up" data-aos-delay="200">
+                    <div class="flex justify-center mb-4">
+                        <div class="w-14 h-14 bg-primary rounded-full flex items-center justify-center">
+                            <i class="fa fa-question-circle text-white text-xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-bold mb-3 text-center">常见问题</h3>
+                    <p class="text-gray-600 text-center text-sm">
+                        查看常见问题解答，快速解决您的疑惑
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-900 text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- 关于我们 -->
+                <div>
+                    <h3 class="text-lg font-bold mb-3">关于我们</h3>
+                    <p class="text-gray-400 text-sm">
+                        PS图片导导助手是一款浏览器到Photoshop图片导入工具，专为设计师打造。
+                    </p>
+                </div>
+                
+                <!-- 快速链接 -->
+                <div>
+                    <h3 class="text-lg font-bold mb-3">快速链接</h3>
+                    <ul class="space-y-1 text-sm">
+                        <li><a href="#home" class="text-gray-400 hover:text-white transition-all-300">首页</a></li>
+                        <li><a href="#features" class="text-gray-400 hover:text-white transition-all-300">功能</a></li>
+                        <li><a href="#how-it-works" class="text-gray-400 hover:text-white transition-all-300">使用教程</a></li>
+                        <li><button class="text-gray-400 hover:text-white transition-all-300 p-0 border-0 bg-transparent" id="footerDownloadBtn">获取</button></li>
+                    </ul>
+                </div>
+                
+                <!-- 联系方式 -->
+                <div>
+                    <h3 class="text-lg font-bold mb-3">联系我们</h3>
+                    <ul class="space-y-1 text-sm">
+                        <li class="flex items-center">
+                            <i class="fa fa-envelope text-primary mr-2"></i>
+                            <a href="mailto:support@imgtops.com" class="text-gray-400 hover:text-white transition-all-300">zlnp@qq.com</a>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fa fa-weixin text-primary mr-2"></i>
+                            <span class="text-gray-400">微信公众号：爱吃馍</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-8 pt-6 text-center">
+                <p class="text-gray-400 text-sm">© 2024 PS图片导导助手. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" class="fixed bottom-6 right-6 bg-primary hover:bg-secondary text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all-300 opacity-0 invisible">
+        <i class="fa fa-chevron-up"></i>
+    </button>
+
+    <script>
+        // 初始化AOS动画
+        document.addEventListener('DOMContentLoaded', function() {
+            AOS.init({
+                duration: 800,
+                easing: 'ease-in-out',
+                once: true
+            });
+            
+            // 移动端菜单切换
+            const menuToggle = document.getElementById('menu-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            menuToggle.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            // 弹窗相关元素
+            const qrcodeModal = document.getElementById('qrcodeModal');
+            const closeModal = document.getElementById('closeModal');
+            // 所有触发弹窗的按钮
+            const downloadBtns = [
+                document.getElementById('downloadBtn'),
+                document.getElementById('mobileDownloadBtn'),
+                document.getElementById('heroDownloadBtn'),
+                document.getElementById('footerDownloadBtn')
+            ];
+
+            // 打开弹窗函数
+            function openModal() {
+                qrcodeModal.classList.remove('opacity-0', 'invisible');
+                qrcodeModal.querySelector('div').classList.remove('scale-95');
+                qrcodeModal.querySelector('div').classList.add('scale-100');
+                document.body.style.overflow = 'hidden'; // 禁止滚动
+            }
+
+            // 关闭弹窗函数
+            function closeModalFn() {
+                qrcodeModal.classList.add('opacity-0', 'invisible');
+                qrcodeModal.querySelector('div').classList.remove('scale-100');
+                qrcodeModal.querySelector('div').classList.add('scale-95');
+                document.body.style.overflow = ''; // 恢复滚动
+            }
+
+            // 所有下载按钮绑定点击事件
+            downloadBtns.forEach(btn => {
+                if(btn) btn.addEventListener('click', openModal);
+            });
+
+            // 关闭按钮绑定事件
+            closeModal.addEventListener('click', closeModalFn);
+            
+            // 点击遮罩层关闭弹窗
+            qrcodeModal.addEventListener('click', function(e) {
+                if (e.target === qrcodeModal) closeModalFn();
+            });
+            
+            // 平滑滚动
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                        
+                        // 如果是移动端，点击后关闭菜单
+                        if (!mobileMenu.classList.contains('hidden')) {
+                            mobileMenu.classList.add('hidden');
+                        }
+                    }
+                });
+            });
+            
+            // 返回顶部按钮
+            const backToTopButton = document.getElementById('back-to-top');
+            
+            window.addEventListener('scroll', function() {
+                if (window.pageYOffset > 300) {
+                    backToTopButton.classList.remove('opacity-0', 'invisible');
+                    backToTopButton.classList.add('opacity-100', 'visible');
+                } else {
+                    backToTopButton.classList.remove('opacity-100', 'visible');
+                    backToTopButton.classList.add('opacity-0', 'invisible');
+                }
+            });
+            
+            backToTopButton.addEventListener('click', function() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+
+</body></html>

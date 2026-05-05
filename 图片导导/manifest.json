@@ -1,0 +1,62 @@
+{
+  "id": "top.z-l.imgtops",
+  "name": "图片导导 Lite",
+  "version": "0.1.2",
+  "main": "main.html",
+  "manifestVersion": 5,
+  "host": {
+    "app": "PS",
+    "minVersion": "23.0.0"
+  },
+  "entrypoints": [
+    {
+      "type": "panel",
+      "id": "importerPanel",
+      "label": {
+        "default": "Importer Lite",
+        "zh-CN": "图片导导 Lite",
+        "zh-TW": "圖片導導 Lite"
+      },
+      "minimumSize": { "width": 230, "height": 300 },
+      "maximumSize": { "width": 230, "height": 300 },
+      "preferredDockedSize": { "width": 230, "height": 300 },
+      "preferredFloatingSize": { "width": 230, "height": 300 },
+      "icons": [
+        {
+          "width": 23,
+          "height": 23,
+          "path": "icons/pluginIcon.png",
+          "scale": [
+            1,
+            2
+          ],
+          "theme": [
+            "all"
+          ]
+        }
+      ]
+    }
+  ],
+  "icons": [
+    {
+      "width": 23,
+      "height": 23,
+      "path": "icons/pluginIcon.png",
+      "scale": [
+        1,
+        2
+      ],
+      "theme": [
+        "all"
+      ],
+      "species": [
+        "pluginList"
+      ]
+    }
+  ],
+  "requiredPermissions": {
+    "clipboard": "read",
+    "network": { "domains": "all" },
+    "localFileSystem": "fullAccess"
+  }
+}

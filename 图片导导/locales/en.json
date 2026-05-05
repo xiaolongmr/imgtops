@@ -1,0 +1,18 @@
+{
+    "title": "Importer Lite",
+    "subtitle": "PS Smart Assistant",
+    "wait": "Waiting to start...",
+    "start": "Start Monitoring",
+    "stop": "Stop Monitoring",
+    "listening": "Listening to clipboard...",
+    "downloading": "⚡ Downloading: ",
+    "footer": "Via: AiChiMo",
+    "success": "Processed: ",
+    "layerName": "Unnamed",
+    "filePrefix": "Via_AiChiMo",
+    "queueAdded": "Added to queue: ",
+    "queueProcessing": "Downloading: ",
+    "queueStatus": "Queue: ",
+    "queueProcessingText": "processing",
+    "queueWaitingText": "waiting"
+}
