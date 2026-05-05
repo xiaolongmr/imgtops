@@ -14,42 +14,29 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Read release config
-        id: config
-        run: |
-          echo "name=$(jq -r '.name' release.config.json)" >> $GITHUB_OUTPUT
-          echo "include=$(jq -r '.include | join(" ") | gsub(" "; ",")' release.config.json)" >> $GITHUB_OUTPUT
-          echo "exclude=$(jq -r '.exclude | join(" ") | gsub(" "; ",")' release.config.json)" >> $GITHUB_OUTPUT
-
       - name: Create release package
         run: |
-          # 读取配置
           NAME=$(jq -r '.name' release.config.json)
           TAG=${{ github.ref_name }}
           
-          # 创建临时目录
           mkdir -p release_tmp
           
-          # 复制需要包含的文件
           for item in $(jq -r '.include[]' release.config.json); do
             if [ -e "$item" ]; then
               cp -r "$item" release_tmp/
             fi
           done
           
-          # 排除不需要的文件
           for item in $(jq -r '.exclude[]' release.config.json); do
             find release_tmp -name "$item" -type f -delete 2>/dev/null || true
           done
           
-          # 打包
           cd release_tmp
-          zip -r "../${NAME}-${TAG}.zip" .
+          zip -r "../${NAME} ${TAG}.zip" .
           cd ..
 
       - name: Create full package (optional)
         run: |
-          # 检查是否有 full_package 配置
           if jq -e '.full_package' release.config.json > /dev/null; then
             NAME=$(jq -r '.name' release.config.json)
             TAG=${{ github.ref_name }}
@@ -61,20 +48,18 @@ jobs:
               fi
             done
             
-            # 添加额外文件到完整包
             for item in $(jq -r '.full_package.include[]' release.config.json); do
               if [ -e "$item" ]; then
                 cp -r "$item" release_full/
               fi
             done
             
-            # 排除文件
             for item in $(jq -r '.exclude[]' release.config.json); do
               find release_full -name "$item" -type f -delete 2>/dev/null || true
             done
             
             cd release_full
-            zip -r "../${NAME}-${TAG}-full.zip" .
+            zip -r "../${NAME} ${TAG}-full.zip" .
           fi
 
       - name: Upload Release assets
