@@ -2,12 +2,9 @@
   "redirects": [
     {
       "source": "/",
-      "destination": "/图片导导/index.html",
+      "destination": "/图片导导/",
       "permanent": false
-    },
-    {
-      "source": "/:path*",
-      "destination": "/图片导导/:path*"
     }
-  ]
+  ],
+  "cleanUrls": true
 }
