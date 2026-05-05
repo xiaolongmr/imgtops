@@ -1,0 +1,48 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Prepare release files
+        run: |
+          # 创建打包目录
+          mkdir -p release
+          
+          # 复制插件文件
+          cp -r 图片导导 release/
+          
+          # 复制安装脚本
+          cp 一键安装.jsx release/
+          
+          # 复制安装目录（如果需要）
+          if [ -d "install" ]; then
+            cp -r install release/
+          fi
+
+      - name: Create ZIP archive
+        run: |
+          cd release
+          zip -r ../imgtops-${{ github.ref_name }}.zip 图片导导 一键安装.jsx
+          if [ -d "install" ]; then
+            zip -r ../imgtops-${{ github.ref_name }}-full.zip 图片导导 一键安装.jsx install
+          fi
+          cd ..
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            imgtops-${{ github.ref_name }}.zip
+            imgtops-${{ github.ref_name }}-full.zip
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
